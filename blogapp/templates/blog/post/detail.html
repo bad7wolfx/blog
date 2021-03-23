@@ -1,0 +1,56 @@
+{% extends "blog/base.html" %}  
+  
+{% block title %}{{ post.title }}{% endblock %}  
+  
+{% block content %}  
+	<h1>{{ post.title }}</h1>
+	<p class="tags">  
+		Теги:  
+		{% for tag in post.tags.all %}  
+			<a href="{% url "blogapp:post_list_by_tag" tag.slug %}">  
+				{{ tag.name }} 
+			</a>  
+			{% if not forloop.last %}, {% endif %}  
+		{% endfor %}  
+	</p>	
+	<p class="date">  
+		Опубликовано {{ post.publish }} автором {{ post.author }}  
+	</p>  
+	{{ post.body|linebreaks }} 
+	<hr class="hr-line">
+	<h2>Похожие посты</h2>  
+	{% for post in similar_posts %}  
+		<p>  
+			<a href="{{ post.get_absolute_url }}">{{ post.title }}</a>  
+		</p>
+		{% empty %}  
+		Похожих постов не нашлось.  
+	{% endfor %}
+	{% with comments.count as total_comments %}  
+	<hr class="hr-line">
+	<h2>  
+		{{ total_comments }} comment{{ total_comments|pluralize }}  
+	</h2>  
+	{% endwith %} 
+	{% for comment in comments %}  
+		<div class="comment">  
+			<p class="info">  
+				Комментарий {{ forloop.counter }} от {{ comment.name }}  
+				{{ comment.created }}  
+			</p>  
+			{{ comment.body|linebreaks }}  
+		</div>  
+		{% empty %}  
+		<p>Комментариев на данный момент нету.</p>  
+	{% endfor %}
+	{% if new_comment %}  
+		<h2>Ваш комментарий добавлен.</h2>  
+		{% else %}  
+		<h2>Добавить комментарий</h2>  
+		<form action="." method="post">  
+			{{ comment_form.as_p }}  
+			{% csrf_token %}  
+			<p><input type="submit" value="Добавить"></p>  
+		</form>
+	{% endif %}	
+{% endblock %}
